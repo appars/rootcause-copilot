@@ -1,0 +1,44 @@
+# SYNTHETIC / FICTIONAL training data - RootCause Copilot workshop. Not from a real system.
+2026-11-16T11:00:06.737Z INFO  [search-service] GET /api/v1/search status=200 latency_ms=154
+2026-11-16T11:00:11.888Z INFO  [search-service] GET /api/v1/search status=200 latency_ms=148
+2026-11-16T11:00:20.543Z INFO  [search-service] GET /api/v1/search status=200 latency_ms=154
+2026-11-16T11:00:27.455Z INFO  [search-service] GET /api/v1/search status=200 latency_ms=127
+2026-11-16T11:00:30.629Z INFO  [search-service] GET /api/v1/search status=200 latency_ms=119
+2026-11-16T11:00:38.285Z INFO  [search-service] GET /api/v1/search status=200 latency_ms=91
+2026-11-16T11:00:45.179Z INFO  [search-service] GET /api/v1/search status=200 latency_ms=175
+2026-11-16T11:00:49.120Z INFO  [search-service] GET /api/v1/search status=200 latency_ms=107
+2026-11-16T11:00:54.934Z INFO  [search-service] cpu usage 41% (limit 500m)
+2026-11-16T11:00:59.414Z INFO  [feature-flags] flag ranking.semantic_rerank changed false -> true (owner: search-team)
+2026-11-16T11:01:03.025Z INFO  [search-service] cpu usage 61% (limit 500m)
+2026-11-16T11:01:06.104Z ERROR [search-service] GET /api/v1/search status=504 latency_ms=2281 rerank_ms=2204
+2026-11-16T11:01:10.781Z INFO  [search-service] cpu usage 66% (limit 500m)
+2026-11-16T11:01:16.118Z WARN  [search-service] GET /api/v1/search status=200 latency_ms=4696 rerank_ms=4549
+2026-11-16T11:01:19.950Z INFO  [search-service] cpu usage 68% (limit 500m)
+2026-11-16T11:01:25.619Z WARN  [search-service] GET /api/v1/search status=200 latency_ms=4209 rerank_ms=4143
+2026-11-16T11:01:34.453Z INFO  [search-service] cpu usage 70% (limit 500m)
+2026-11-16T11:01:38.710Z WARN  [search-service] GET /api/v1/search status=200 latency_ms=1821 rerank_ms=1744
+2026-11-16T11:01:46.944Z INFO  [search-service] cpu usage 73% (limit 500m)
+2026-11-16T11:01:51.826Z ERROR [search-service] GET /api/v1/search status=504 latency_ms=3164 rerank_ms=3089
+2026-11-16T11:02:00.083Z INFO  [search-service] cpu usage 79% (limit 500m)
+2026-11-16T11:02:04.312Z WARN  [search-service] GET /api/v1/search status=200 latency_ms=4902 rerank_ms=4764
+2026-11-16T11:02:13.111Z WARN  [search-service] cpu usage 82% (limit 500m)
+2026-11-16T11:02:17.904Z WARN  [search-service] GET /api/v1/search status=200 latency_ms=4089 rerank_ms=3993
+2026-11-16T11:02:21.900Z WARN  [search-service] cpu usage 87% (limit 500m)
+2026-11-16T11:02:26.483Z WARN  [search-service] GET /api/v1/search status=200 latency_ms=3416 rerank_ms=3324
+2026-11-16T11:02:34.387Z WARN  [search-service] cpu usage 91% (limit 500m)
+2026-11-16T11:02:37.407Z ERROR [search-service] GET /api/v1/search status=504 latency_ms=5460 rerank_ms=5324
+2026-11-16T11:02:42.435Z WARN  [search-service] cpu usage 98% (limit 500m)
+2026-11-16T11:02:47.567Z WARN  [search-service] GET /api/v1/search status=200 latency_ms=4749 rerank_ms=4660
+2026-11-16T11:02:53.451Z WARN  [kubelet] container search-service cpu throttling: throttled 71% of periods
+2026-11-16T11:02:57.560Z WARN  [search-service] cpu usage 100% (limit 500m)
+2026-11-16T11:03:04.788Z WARN  [search-service] GET /api/v1/search status=200 latency_ms=5535 rerank_ms=5478
+2026-11-16T11:03:13.638Z WARN  [search-service] cpu usage 100% (limit 500m)
+2026-11-16T11:03:22.334Z WARN  [search-service] GET /api/v1/search status=200 latency_ms=3693 rerank_ms=3598
+2026-11-16T11:03:25.442Z WARN  [search-service] cpu usage 100% (limit 500m)
+2026-11-16T11:03:30.955Z ERROR [search-service] GET /api/v1/search status=504 latency_ms=6826 rerank_ms=6728
+2026-11-16T11:03:37.426Z WARN  [kubelet] container search-service cpu throttling: throttled 71% of periods
+2026-11-16T11:03:43.143Z WARN  [search-service] cpu usage 100% (limit 500m)
+2026-11-16T11:03:47.229Z WARN  [search-service] GET /api/v1/search status=200 latency_ms=6498 rerank_ms=6423
+2026-11-16T11:03:50.943Z INFO  [search-service] JVM heap used=46% gc_pause_ms=18
+2026-11-16T11:03:55.419Z INFO  [search-service] index shard health=green replicas=2/2
+2026-11-16T11:04:03.336Z WARN  [api-gateway] upstream search-service p95 latency 3900ms above SLO 600ms

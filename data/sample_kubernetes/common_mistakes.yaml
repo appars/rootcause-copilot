@@ -1,0 +1,42 @@
+# SYNTHETIC example containing deliberate mistakes for the Kubernetes Analyzer exercise.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: catalog-service
+spec:
+  selector:
+    matchLabels: {app: catalog}
+  template:
+    metadata:
+      labels: {app: catalog-service}
+    spec:
+      containers:
+        - name: catalog
+          image: catalog-service:latest
+          ports:
+            - containerPort: 9000
+          volumeMounts:
+            - {name: cache, mountPath: /cache}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: catalog-service
+spec:
+  selector: {app: catalog}
+  ports:
+    - {port: 80, targetPort: 8080}
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: catalog-api
+stringData:
+  apiKey: this-is-a-fake-demo-key
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: catalog-data
+spec:
+  accessModes: [ReadWriteOnce]

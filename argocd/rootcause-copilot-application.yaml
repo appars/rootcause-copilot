@@ -1,0 +1,22 @@
+# ArgoCD Application: "keep namespace 'rootcause' in sync with this folder of the GitOps repository".
+# PLACEHOLDER: replace GITHUB_USERNAME with your GitHub account (the repository must be reachable by ArgoCD;
+# a public repository needs no credentials).
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: rootcause-copilot
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/GITHUB_USERNAME/rootcause-copilot-gitops.git
+    targetRevision: main
+    path: apps/rootcause-copilot
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: rootcause
+  # No "automated" block: the FIRST deployment is a manual sync, so students see each step.
+  # Auto-sync is switched on later in the demo (see docs/DAY5_MAC_INSTRUCTOR_GUIDE.md).
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true

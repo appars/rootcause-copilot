@@ -1,0 +1,5 @@
+# Keep line endings stable on Windows clones (log line numbers must not change).
+* text=auto eol=lf
+*.ps1 text eol=crlf
+*.pdf binary
+*.png binary

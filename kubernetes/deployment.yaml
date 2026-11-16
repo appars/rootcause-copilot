@@ -1,0 +1,70 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rootcause-copilot
+  namespace: rootcause
+  labels: {app: rootcause-copilot}
+spec:
+  # ONE replica on purpose: SQLite on a single ReadWriteOnce volume is not a shared multi-writer database.
+  # Production multi-replica designs should use PostgreSQL or another managed database.
+  replicas: 1
+  strategy:
+    type: Recreate            # stop the old pod before the new one mounts the same SQLite volume
+  selector:
+    matchLabels: {app: rootcause-copilot}
+  template:
+    metadata:
+      labels: {app: rootcause-copilot}
+    spec:
+      automountServiceAccountToken: false   # the app never talks to the Kubernetes API
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        fsGroup: 10001        # makes the mounted volume writable for the non-root user
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: rootcause-copilot
+          # PLACEHOLDER image - the tag is managed in kustomization.yaml (never "latest").
+          image: docker.io/DOCKERHUB_USERNAME/rootcause-copilot:day4-v1
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+          ports:
+            - name: http
+              containerPort: 8501
+          envFrom:
+            - configMapRef:
+                name: rootcause-config
+          env:
+            - name: GROQ_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: rootcause-groq
+                  key: GROQ_API_KEY
+                  optional: true        # app still starts (Demo Mode) if the Secret does not exist
+          resources:
+            requests: {cpu: 250m, memory: 512Mi}
+            limits: {cpu: "1", memory: 1Gi}
+          startupProbe:
+            httpGet: {path: /_stcore/health, port: http}
+            periodSeconds: 5
+            failureThreshold: 30      # up to 150 s for the first start
+          readinessProbe:
+            httpGet: {path: /_stcore/health, port: http}
+            periodSeconds: 10
+            failureThreshold: 3
+          livenessProbe:
+            httpGet: {path: /_stcore/health, port: http}
+            periodSeconds: 20
+            failureThreshold: 3
+          volumeMounts:
+            - name: data
+              mountPath: /data
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: rootcause-data

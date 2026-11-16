@@ -1,0 +1,80 @@
+[
+  {
+    "id": "HIST-2026-031",
+    "title": "Checkout latency spike and payment failures",
+    "service": "payment-service",
+    "severity": "SEV1",
+    "created_at": "2026-10-14T11:05:00+00:00",
+    "description": "FICTIONAL historical record. Checkout requests timed out for 25 minutes during the morning peak.",
+    "symptoms": "checkout 503 errors, HikariPool connection is not available, pool active=20 idle=0, slow queries",
+    "log_patterns": ["db_pool_pressure", "db_timeout", "slow_transaction", "payment_errors"],
+    "root_cause": "Database connection pool exhausted: long-running reporting queries held connections, so checkout requests waited until the 30s connection timeout.",
+    "resolution": "Stopped the reporting job, restarted payment-service pods one at a time, then moved reporting queries to the read replica and added a 5s statement timeout.",
+    "lessons_learned": "Keep batch/reporting work off the transactional connection pool; alert on pool 'waiting' count, not only on latency."
+  },
+  {
+    "id": "HIST-2026-018",
+    "title": "Order creation failures during carrier outage",
+    "service": "order-service",
+    "severity": "SEV2",
+    "created_at": "2026-09-02T15:40:00+00:00",
+    "description": "FICTIONAL historical record. A third-party carrier API degraded; order-service retried aggressively.",
+    "symptoms": "504 on order creation, read timed out calling shipping quote, retries exhausted, worker pool saturated",
+    "log_patterns": ["downstream_timeout", "retries", "slow_transaction"],
+    "root_cause": "Slow downstream dependency (shipping quotes) combined with 3 retries per request amplified load and exhausted worker threads.",
+    "resolution": "Reduced retries to 1, lowered timeout to 2s, added a circuit breaker and a cached fallback quote.",
+    "lessons_learned": "Retries without a budget turn a slow dependency into an outage; use circuit breakers and fallbacks."
+  },
+  {
+    "id": "HIST-2026-007",
+    "title": "Inventory pods OOMKilled after catalogue import",
+    "service": "inventory-service",
+    "severity": "SEV2",
+    "created_at": "2026-07-21T09:10:00+00:00",
+    "description": "FICTIONAL historical record. Pods restarted repeatedly after a large catalogue import.",
+    "symptoms": "OutOfMemoryError Java heap space, OOMKilled exit code 137, Full GC pauses, restart loop",
+    "log_patterns": ["memory_pressure", "restart_crash"],
+    "root_cause": "Unbounded in-memory product cache grew past the 512Mi container memory limit.",
+    "resolution": "Capped the cache size, set JVM max heap to 75% of the container limit, raised the limit to 1Gi after profiling.",
+    "lessons_learned": "Every in-memory cache needs a size bound; memory limits must match JVM heap settings."
+  },
+  {
+    "id": "HIST-2025-112",
+    "title": "Notification deployment stuck - missing configuration",
+    "service": "notification-service",
+    "severity": "SEV3",
+    "created_at": "2025-12-03T17:20:00+00:00",
+    "description": "FICTIONAL historical record. A release renamed a configuration key.",
+    "symptoms": "CreateContainerConfigError, could not resolve placeholder, readiness probe failed, rollout stuck",
+    "log_patterns": ["config_error", "startup_failure", "restart_crash"],
+    "root_cause": "The new release referenced a ConfigMap/key that had not been created in the cluster.",
+    "resolution": "Created the missing ConfigMap through the GitOps repository and re-synced; added a pre-deployment manifest check.",
+    "lessons_learned": "Ship configuration changes together with (or before) the code that needs them; validate references in CI."
+  },
+  {
+    "id": "HIST-2025-090",
+    "title": "Payment provider calls failing - TLS certificate expired",
+    "service": "payment-service",
+    "severity": "SEV1",
+    "created_at": "2025-10-30T08:00:00+00:00",
+    "description": "FICTIONAL historical record (a useful distractor: same service, different cause).",
+    "symptoms": "x509 certificate has expired, SSL handshake failure when calling the payment provider",
+    "log_patterns": [],
+    "root_cause": "An expired client TLS certificate for the payment provider integration.",
+    "resolution": "Rotated the certificate and added expiry monitoring 30 days in advance.",
+    "lessons_learned": "Monitor certificate expiry; similar symptoms on the same service do not always share a root cause."
+  },
+  {
+    "id": "HIST-2025-075",
+    "title": "Search latency due to CPU throttling",
+    "service": "search-service",
+    "severity": "SEV3",
+    "created_at": "2025-08-11T13:30:00+00:00",
+    "description": "FICTIONAL historical record.",
+    "symptoms": "cpu throttling, slow requests, high load average",
+    "log_patterns": ["cpu_pressure", "slow_transaction"],
+    "root_cause": "CPU limit set too low for the new ranking model.",
+    "resolution": "Raised the CPU limit and added a horizontal pod autoscaler.",
+    "lessons_learned": "Load-test resource limits when changing compute-heavy code paths."
+  }
+]

@@ -1,0 +1,9 @@
+# Non-secret configuration only. The Groq API key is NOT here - see README.md (Secret created separately).
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: rootcause-config
+  namespace: rootcause
+data:
+  ROOTCAUSE_DATA_DIR: /data
+  ROOTCAUSE_MAX_UPLOAD_BYTES: "2097152"

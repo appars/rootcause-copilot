@@ -1,0 +1,33 @@
+# SYNTHETIC / FICTIONAL training data - RootCause Copilot workshop. Not from a real system.
+2026-11-15T16:05:01.096Z INFO  [argocd] Sync started: notification-service image notification-service:2.3.0 (previous 2.2.4)
+2026-11-15T16:05:01.689Z INFO  [kubelet] Pulling image registry.example.local/notification-service:2.3.0
+2026-11-15T16:05:03.394Z INFO  [kubelet] Successfully pulled image registry.example.local/notification-service:2.3.0
+2026-11-15T16:05:04.182Z WARN  [kubelet] Error: configmap "notification-config-v2" not found (CreateContainerConfigError) pod=notification-service-6d8b-q2kx
+2026-11-15T16:05:04.635Z WARN  [kubelet] Error: configmap "notification-config-v2" not found (CreateContainerConfigError) pod=notification-service-6d8b-p7lm
+2026-11-15T16:05:22.667Z INFO  [notification-service] Starting NotificationApplication v2.3.0
+2026-11-15T16:05:26.355Z INFO  [notification-service] Loading configuration from environment and /etc/config
+2026-11-15T16:05:29.597Z WARN  [notification-service] environment variable SMTP_HOST is not set
+2026-11-15T16:05:32.705Z ERROR [notification-service] Could not resolve placeholder 'SMTP_HOST' in value "${SMTP_HOST}"
+2026-11-15T16:05:33.748Z ERROR [notification-service] Application run failed: missing required property mail.smtp.host
+2026-11-15T16:05:35.987Z INFO  [notification-service] shutting down due to startup failure
+2026-11-15T16:05:37.239Z WARN  [kubelet] Readiness probe failed: HTTP probe failed with statuscode: 503
+2026-11-15T16:05:38.095Z WARN  [kubelet] Back-off restarting failed container notification-service restart count=1
+2026-11-15T16:05:50.218Z INFO  [notification-service] Starting NotificationApplication v2.3.0
+2026-11-15T16:05:51.233Z INFO  [notification-service] Loading configuration from environment and /etc/config
+2026-11-15T16:05:54.958Z WARN  [notification-service] environment variable SMTP_HOST is not set
+2026-11-15T16:05:58.307Z ERROR [notification-service] Could not resolve placeholder 'SMTP_HOST' in value "${SMTP_HOST}"
+2026-11-15T16:06:01.573Z ERROR [notification-service] Application run failed: missing required property mail.smtp.host
+2026-11-15T16:06:04.814Z INFO  [notification-service] shutting down due to startup failure
+2026-11-15T16:06:05.750Z WARN  [kubelet] Readiness probe failed: HTTP probe failed with statuscode: 503
+2026-11-15T16:06:07.127Z WARN  [kubelet] Back-off restarting failed container notification-service restart count=2
+2026-11-15T16:06:29.666Z INFO  [notification-service] Starting NotificationApplication v2.3.0
+2026-11-15T16:06:32.648Z INFO  [notification-service] Loading configuration from environment and /etc/config
+2026-11-15T16:06:36.095Z WARN  [notification-service] environment variable SMTP_HOST is not set
+2026-11-15T16:06:39.640Z ERROR [notification-service] Could not resolve placeholder 'SMTP_HOST' in value "${SMTP_HOST}"
+2026-11-15T16:06:40.169Z ERROR [notification-service] Application run failed: missing required property mail.smtp.host
+2026-11-15T16:06:42.671Z INFO  [notification-service] shutting down due to startup failure
+2026-11-15T16:06:45.424Z WARN  [kubelet] Readiness probe failed: HTTP probe failed with statuscode: 503
+2026-11-15T16:06:47.546Z WARN  [kubelet] Back-off restarting failed container notification-service restart count=3
+2026-11-15T16:06:48.422Z WARN  [kube-controller] deployment notification-service: 0/2 replicas available (rollout stuck)
+2026-11-15T16:06:50.422Z INFO  [notification-service-old] pod notification-service-5c7a-k9 (2.2.4) still serving traffic
+2026-11-15T16:06:50.961Z INFO  [notification-service-old] cpu usage 22% JVM heap used=37%

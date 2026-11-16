@@ -1,0 +1,49 @@
+# SYNTHETIC training manifest for the Day 4 mini challenge (search-service). Not a real system.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: search-service
+  namespace: shop
+  labels: {app: search-service}
+spec:
+  replicas: 2
+  selector:
+    matchLabels: {app: search-service}
+  template:
+    metadata:
+      labels: {app: search-service}
+    spec:
+      containers:
+        - name: search-service
+          image: registry.example.local/search-service:3.4.0
+          ports:
+            - {name: http, containerPort: 8080}
+          envFrom:
+            - configMapRef: {name: search-config}
+          resources:
+            requests: {cpu: 250m, memory: 512Mi}
+            limits: {cpu: 500m, memory: 1Gi}
+          readinessProbe:
+            httpGet: {path: /health/ready, port: http}
+          livenessProbe:
+            httpGet: {path: /health/live, port: http}
+            initialDelaySeconds: 20
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: search-config
+  namespace: shop
+data:
+  RERANK_MODEL: semantic-v2
+  RERANK_TOP_K: "200"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: search-service
+  namespace: shop
+spec:
+  selector: {app: search-service}
+  ports:
+    - {port: 80, targetPort: http}

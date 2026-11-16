@@ -1,0 +1,48 @@
+[
+  {
+    "id": "INC-001",
+    "title": "Payment service: checkout failures",
+    "service": "payment-service",
+    "severity": "SEV1",
+    "description": "Customers report checkout failures starting around 10:30 AM. Monitoring shows elevated 5xx errors and high latency on POST /api/v1/checkout. (Synthetic scenario)",
+    "log_file": "inc001_payment_service.log",
+    "yaml_file": null
+  },
+  {
+    "id": "INC-002",
+    "title": "Order service: order creation delayed or failing",
+    "service": "order-service",
+    "severity": "SEV2",
+    "description": "Order creation is slow and some requests return 504. Customer support reports orders stuck at 'confirming'. (Synthetic scenario)",
+    "log_file": "inc002_order_service.log",
+    "yaml_file": null
+  },
+  {
+    "id": "INC-003",
+    "title": "Inventory service: unstable, pods restarting",
+    "service": "inventory-service",
+    "severity": "SEV2",
+    "description": "Stock lookups intermittently fail with 500 errors and the inventory pods keep restarting. (Synthetic scenario)",
+    "log_file": "inc003_inventory_service.log",
+    "yaml_file": "inc003_inventory_service.yaml"
+  },
+  {
+    "id": "INC-004",
+    "title": "Notification service: fails to start after deployment",
+    "service": "notification-service",
+    "severity": "SEV3",
+    "description": "After rolling out version 2.3.0, new notification-service pods never become ready; the old version is still serving. (Synthetic scenario)",
+    "log_file": "inc004_notification_service.log",
+    "yaml_file": "inc004_notification_service.yaml"
+  },
+  {
+    "id": "CHALLENGE-01",
+    "title": "Search service: slow and timing-out searches",
+    "service": "search-service",
+    "severity": "SEV2",
+    "description": "Day 4 mini challenge (unfamiliar incident). Search requests became slow around 11:00 and some return 504. Investigate and justify your root-cause hypothesis with evidence. (Synthetic scenario)",
+    "log_file": "challenge01_search_service.log",
+    "yaml_file": "challenge01_search_service.yaml",
+    "challenge": true
+  }
+]

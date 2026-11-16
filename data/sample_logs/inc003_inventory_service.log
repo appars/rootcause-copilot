@@ -1,0 +1,81 @@
+# SYNTHETIC / FICTIONAL training data - RootCause Copilot workshop. Not from a real system.
+2026-11-14T08:40:01.104Z INFO  [inventory-service] Started InventoryApplication in 21.4 seconds (pod inventory-service-7f9c-0x)
+2026-11-14T08:40:11.653Z INFO  [inventory-service] product-cache size=1051333 entries; JVM heap used=62% of 512Mi
+2026-11-14T08:40:14.148Z INFO  [inventory-service] GET /api/v1/stock status=200 latency_ms=120
+2026-11-14T08:40:28.232Z INFO  [inventory-service] product-cache size=1207466 entries; JVM heap used=65% of 512Mi
+2026-11-14T08:40:31.885Z INFO  [inventory-service] GET /api/v1/stock status=200 latency_ms=100
+2026-11-14T08:40:39.762Z INFO  [inventory-service] product-cache size=1321460 entries; JVM heap used=69% of 512Mi
+2026-11-14T08:40:42.687Z INFO  [inventory-service] GET /api/v1/stock status=200 latency_ms=109
+2026-11-14T08:40:53.644Z INFO  [inventory-service] product-cache size=1473501 entries; JVM heap used=75% of 512Mi
+2026-11-14T08:40:57.116Z INFO  [inventory-service] GET /api/v1/stock status=200 latency_ms=69
+2026-11-14T08:41:13.234Z INFO  [inventory-service] product-cache size=1573374 entries; JVM heap used=81% of 512Mi
+2026-11-14T08:41:15.986Z INFO  [inventory-service] GET /api/v1/stock status=200 latency_ms=138
+2026-11-14T08:41:25.505Z INFO  [inventory-service] product-cache size=1674266 entries; JVM heap used=84% of 512Mi
+2026-11-14T08:41:25.823Z INFO  [inventory-service] GET /api/v1/stock status=200 latency_ms=434
+2026-11-14T08:41:41.535Z WARN  [inventory-service] product-cache size=1816230 entries; JVM heap used=90% of 512Mi
+2026-11-14T08:41:44.377Z WARN  [inventory-service] Full GC pause 3417ms (heap after GC 88%)
+2026-11-14T08:41:47.344Z INFO  [inventory-service] GET /api/v1/stock status=200 latency_ms=1013
+2026-11-14T08:42:05.527Z WARN  [inventory-service] product-cache size=1954507 entries; JVM heap used=94% of 512Mi
+2026-11-14T08:42:06.722Z WARN  [inventory-service] Full GC pause 2356ms (heap after GC 92%)
+2026-11-14T08:42:08.802Z INFO  [inventory-service] GET /api/v1/stock status=200 latency_ms=1333
+2026-11-14T08:42:12.671Z ERROR [inventory-service] java.lang.OutOfMemoryError: Java heap space
+	at com.example.inventory.cache.ProductCache.put(ProductCache.java:88)
+	at com.example.inventory.service.StockService.refresh(StockService.java:142)
+	at com.example.inventory.api.StockController.get(StockController.java:41)
+2026-11-14T08:42:14.528Z ERROR [inventory-service] GET /api/v1/stock status=500 error=INTERNAL
+2026-11-14T08:42:17.110Z WARN  [kubelet] container inventory-service terminated reason=OOMKilled exit code 137 restart count=1
+2026-11-14T08:42:18.454Z INFO  [inventory-service] Started InventoryApplication in 21.4 seconds (pod inventory-service-7f9c-1x)
+2026-11-14T08:42:32.064Z INFO  [inventory-service] product-cache size=1046485 entries; JVM heap used=64% of 512Mi
+2026-11-14T08:42:34.294Z INFO  [inventory-service] GET /api/v1/stock status=200 latency_ms=92
+2026-11-14T08:42:52.857Z INFO  [inventory-service] product-cache size=1203064 entries; JVM heap used=68% of 512Mi
+2026-11-14T08:42:55.648Z INFO  [inventory-service] GET /api/v1/stock status=200 latency_ms=43
+2026-11-14T08:43:11.127Z INFO  [inventory-service] product-cache size=1319722 entries; JVM heap used=72% of 512Mi
+2026-11-14T08:43:12.568Z INFO  [inventory-service] GET /api/v1/stock status=200 latency_ms=109
+2026-11-14T08:43:28.275Z INFO  [inventory-service] product-cache size=1474689 entries; JVM heap used=75% of 512Mi
+2026-11-14T08:43:29.277Z INFO  [inventory-service] GET /api/v1/stock status=200 latency_ms=113
+2026-11-14T08:43:36.144Z INFO  [inventory-service] product-cache size=1589696 entries; JVM heap used=80% of 512Mi
+2026-11-14T08:43:38.175Z INFO  [inventory-service] GET /api/v1/stock status=200 latency_ms=101
+2026-11-14T08:43:55.184Z WARN  [inventory-service] product-cache size=1681298 entries; JVM heap used=85% of 512Mi
+2026-11-14T08:43:56.944Z INFO  [inventory-service] GET /api/v1/stock status=200 latency_ms=509
+2026-11-14T08:44:08.351Z WARN  [inventory-service] product-cache size=1763935 entries; JVM heap used=90% of 512Mi
+2026-11-14T08:44:10.181Z WARN  [inventory-service] Full GC pause 2287ms (heap after GC 88%)
+2026-11-14T08:44:10.549Z INFO  [inventory-service] GET /api/v1/stock status=200 latency_ms=1018
+2026-11-14T08:44:26.326Z WARN  [inventory-service] product-cache size=1849825 entries; JVM heap used=96% of 512Mi
+2026-11-14T08:44:27.988Z WARN  [inventory-service] Full GC pause 2943ms (heap after GC 94%)
+2026-11-14T08:44:30.109Z INFO  [inventory-service] GET /api/v1/stock status=200 latency_ms=1484
+2026-11-14T08:44:31.485Z ERROR [inventory-service] java.lang.OutOfMemoryError: Java heap space
+	at com.example.inventory.cache.ProductCache.put(ProductCache.java:88)
+	at com.example.inventory.service.StockService.refresh(StockService.java:142)
+	at com.example.inventory.api.StockController.get(StockController.java:41)
+2026-11-14T08:44:31.978Z ERROR [inventory-service] GET /api/v1/stock status=500 error=INTERNAL
+2026-11-14T08:44:34.457Z WARN  [kubelet] container inventory-service terminated reason=OOMKilled exit code 137 restart count=2
+2026-11-14T08:44:34.776Z WARN  [kubelet] Back-off restarting failed container inventory-service
+2026-11-14T08:44:35.726Z INFO  [inventory-service] Started InventoryApplication in 21.4 seconds (pod inventory-service-7f9c-2x)
+2026-11-14T08:44:49.883Z INFO  [inventory-service] product-cache size=1033469 entries; JVM heap used=63% of 512Mi
+2026-11-14T08:44:50.677Z INFO  [inventory-service] GET /api/v1/stock status=200 latency_ms=45
+2026-11-14T08:45:01.080Z INFO  [inventory-service] product-cache size=1158009 entries; JVM heap used=68% of 512Mi
+2026-11-14T08:45:01.805Z INFO  [inventory-service] GET /api/v1/stock status=200 latency_ms=88
+2026-11-14T08:45:19.854Z INFO  [inventory-service] product-cache size=1287390 entries; JVM heap used=74% of 512Mi
+2026-11-14T08:45:21.521Z INFO  [inventory-service] GET /api/v1/stock status=200 latency_ms=116
+2026-11-14T08:45:35.823Z INFO  [inventory-service] product-cache size=1440693 entries; JVM heap used=77% of 512Mi
+2026-11-14T08:45:39.597Z INFO  [inventory-service] GET /api/v1/stock status=200 latency_ms=104
+2026-11-14T08:45:54.112Z INFO  [inventory-service] product-cache size=1556252 entries; JVM heap used=83% of 512Mi
+2026-11-14T08:45:57.031Z INFO  [inventory-service] GET /api/v1/stock status=200 latency_ms=348
+2026-11-14T08:46:09.848Z WARN  [inventory-service] product-cache size=1693588 entries; JVM heap used=88% of 512Mi
+2026-11-14T08:46:11.945Z WARN  [inventory-service] Full GC pause 1846ms (heap after GC 86%)
+2026-11-14T08:46:15.141Z INFO  [inventory-service] GET /api/v1/stock status=200 latency_ms=834
+2026-11-14T08:46:25.789Z WARN  [inventory-service] product-cache size=1814859 entries; JVM heap used=91% of 512Mi
+2026-11-14T08:46:27.967Z WARN  [inventory-service] Full GC pause 2345ms (heap after GC 89%)
+2026-11-14T08:46:28.395Z INFO  [inventory-service] GET /api/v1/stock status=200 latency_ms=1110
+2026-11-14T08:46:38.689Z WARN  [inventory-service] product-cache size=1938433 entries; JVM heap used=97% of 512Mi
+2026-11-14T08:46:41.524Z WARN  [inventory-service] Full GC pause 2942ms (heap after GC 95%)
+2026-11-14T08:46:44.528Z INFO  [inventory-service] GET /api/v1/stock status=200 latency_ms=1572
+2026-11-14T08:46:46.968Z ERROR [inventory-service] java.lang.OutOfMemoryError: Java heap space
+	at com.example.inventory.cache.ProductCache.put(ProductCache.java:88)
+	at com.example.inventory.service.StockService.refresh(StockService.java:142)
+	at com.example.inventory.api.StockController.get(StockController.java:41)
+2026-11-14T08:46:50.796Z ERROR [inventory-service] GET /api/v1/stock status=500 error=INTERNAL
+2026-11-14T08:46:51.077Z WARN  [kubelet] container inventory-service terminated reason=OOMKilled exit code 137 restart count=3
+2026-11-14T08:46:52.680Z WARN  [kubelet] Back-off restarting failed container inventory-service
+2026-11-14T08:46:55.266Z INFO  [inventory-service] database connections active=4 idle=16
+2026-11-14T08:46:56.601Z INFO  [inventory-service] cpu usage 47%

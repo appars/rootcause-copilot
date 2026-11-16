@@ -1,0 +1,16 @@
+# Persistent storage for SQLite incident memory.
+# No storageClassName: the cluster default is used (Rancher Desktop / k3s ships "local-path").
+# local-path binds with WaitForFirstConsumer: the PVC shows Pending until the pod is scheduled - that is normal.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: rootcause-data
+  namespace: rootcause
+  annotations:
+    # Safety: even with ArgoCD auto-sync + prune, never delete the volume holding incident memory.
+    argocd.argoproj.io/sync-options: Prune=false
+spec:
+  accessModes: [ReadWriteOnce]
+  resources:
+    requests:
+      storage: 1Gi

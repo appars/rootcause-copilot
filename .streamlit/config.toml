@@ -1,0 +1,14 @@
+# Streamlit settings for RootCause Copilot (safe to commit - contains no secrets).
+[browser]
+gatherUsageStats = false
+
+[client]
+# Students see generic error messages; tracebacks go to the console / log only.
+showErrorDetails = "none"
+
+[server]
+maxUploadSize = 2          # MB - matches the application's own upload limit
+
+[theme]
+base = "light"
+primaryColor = "#2563EB"

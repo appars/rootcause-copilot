@@ -1,0 +1,24 @@
+# Keep the image small and free of secrets.
+.git
+.gitignore
+.env
+.env.*
+!.env.example
+.streamlit/secrets.toml
+.venv
+venv
+env
+**/__pycache__
+**/*.pyc
+.pytest_cache
+data_store
+*.db
+*.sqlite
+tests
+docs
+kubernetes
+argocd
+docker
+scripts
+data/error_samples
+README.md

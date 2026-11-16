@@ -1,0 +1,70 @@
+# SYNTHETIC example: a reasonably healthy payment-service manifest set.
+# The Secret below contains a FAKE base64 value only to demonstrate masking.
+# Never commit real Secret values to Git.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: payment-service
+  namespace: shop
+spec:
+  replicas: 3
+  selector:
+    matchLabels: {app: payment-service}
+  template:
+    metadata:
+      labels: {app: payment-service}
+    spec:
+      containers:
+        - name: payment-service
+          image: registry.example.local/payment-service:7.2.0
+          ports:
+            - {name: http, containerPort: 8080}
+          envFrom:
+            - configMapRef: {name: payment-config}
+          env:
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef: {name: payment-db, key: password}
+          resources:
+            requests: {cpu: 250m, memory: 512Mi}
+            limits: {cpu: "1", memory: 1Gi}
+          readinessProbe:
+            httpGet: {path: /actuator/health/readiness, port: http}
+          livenessProbe:
+            httpGet: {path: /actuator/health/liveness, port: http}
+            initialDelaySeconds: 30
+          volumeMounts:
+            - {name: receipts, mountPath: /var/receipts}
+      volumes:
+        - name: receipts
+          persistentVolumeClaim: {claimName: payment-receipts}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata: {name: payment-config, namespace: shop}
+data:
+  DB_POOL_MAX_SIZE: "20"
+  DB_CONNECTION_TIMEOUT_MS: "30000"
+---
+apiVersion: v1
+kind: Secret
+metadata: {name: payment-db, namespace: shop}
+type: Opaque
+data:
+  password: ZmFrZS1kZW1vLXZhbHVlLW5vdC1yZWFs   # fake demo value
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata: {name: payment-receipts, namespace: shop}
+spec:
+  accessModes: [ReadWriteOnce]
+  resources:
+    requests: {storage: 1Gi}
+---
+apiVersion: v1
+kind: Service
+metadata: {name: payment-service, namespace: shop}
+spec:
+  selector: {app: payment-service}
+  ports:
+    - {port: 80, targetPort: http}

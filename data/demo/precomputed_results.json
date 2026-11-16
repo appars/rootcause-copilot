@@ -1,0 +1,56 @@
+{
+  "_note": "Demo Mode - simulated/precomputed output for the bundled synthetic scenarios. No LLM call is made. 'initial' is deliberately imperfect in some scenarios so the reflection stage has something real to catch.",
+  "INC-001": {
+    "initial": {
+      "hypothesis": "Checkout requests are failing because payment-service cannot obtain database connections: the connection pool is saturated (active=20, idle=0, many waiting) and requests time out after 30s. This was most likely triggered by the deployment just before 10:30.",
+      "root_cause_category": "database_connection_pool",
+      "supporting_evidence": ["Pool stats show total=20, active=20, idle=0 with dozens of requests waiting", "SQLTransientConnectionException: Connection is not available, request timed out after 30000ms", "Checkout returns status=503 with ~30s latency"],
+      "confidence": "high",
+      "alternatives": ["Slow downstream payment provider"],
+      "missing_evidence": ["Database server metrics"],
+      "remediation": {"action": "Restart payment-service pods one at a time to release held connections, then pause the long-running reporting job", "action_type": "restart_service", "target": "payment-service", "expected_impact": "Checkout should recover within minutes if held connections are released", "risks": "In-flight checkouts on a restarting pod may fail; the problem returns if the reporting job keeps holding connections", "preconditions": "Confirm pool saturation in metrics; at least 2 replicas so restarts are rolling", "rollback": "Not applicable to a restart; if errors increase, stop and escalate to the database on-call"}
+    },
+    "revised": {
+      "hypothesis": "Checkout requests are failing because payment-service cannot obtain database connections: the connection pool is saturated (active=20, idle=0, many waiting) and requests time out after 30s. The pool filled up while very slow settlement-report queries were running, which suggests the reporting job is holding connections. No deployment evidence was found.",
+      "root_cause_category": "database_connection_pool",
+      "supporting_evidence": ["Pool stats move from idle=8 to idle=0 with waiting requests growing", "Repeated 'Connection is not available, request timed out after 30000ms'", "Slow queries of 9-26 seconds from job=settlement-report-export start before the errors", "Heap and CPU look normal, which argues against memory/CPU causes"],
+      "confidence": "medium",
+      "alternatives": ["Database server itself is slow (no DB-side metrics available)", "Connection leak in application code"],
+      "missing_evidence": ["Database server metrics (CPU, locks, active sessions)", "Whether the reporting job runs on the same connection pool"],
+      "remediation": {"action": "Pause the settlement-report export job and perform a rolling restart of payment-service to release held connections", "action_type": "restart_service", "target": "payment-service", "expected_impact": "Free connections become available; checkout latency should return to normal", "risks": "In-flight checkouts on a restarting pod may fail; restart alone will not prevent recurrence", "preconditions": "Confirm the job can be paused safely; at least 2 replicas for a rolling restart", "rollback": "Resume the job after the incident; a restart cannot be undone but is low risk with rolling replicas"}
+    }
+  },
+  "INC-002": {
+    "initial": {
+      "hypothesis": "Order creation is slow and failing because calls to shipping-quote-service time out after 5s and are retried up to 3 times, so one order can wait 15s. The retries keep worker threads busy (50/50 active, 212 queued), which slows down all orders. The upstream carrier-rates API is responding slowly.",
+      "root_cause_category": "downstream_dependency",
+      "supporting_evidence": ["Repeated 'request to http://shipping-quote-svc:8080/v2/quote timed out after 5000ms'", "Retry attempts 2/3 and 3/3 followed by 'retries exhausted' and 504 responses", "order-worker pool active=50/50 queue=212", "shipping-quote-service reports carrier-rates API avg 4800ms"],
+      "confidence": "medium",
+      "alternatives": ["Order-service database slowness (but DB connections look healthy)"],
+      "missing_evidence": ["Metrics from shipping-quote-service and the carrier API"],
+      "remediation": {"action": "Reduce shipping-quote retries from 3 to 1, lower the timeout to 2s and enable a circuit breaker with a cached fallback quote", "action_type": "update_configuration", "target": "order-service", "expected_impact": "Orders stop waiting 15s; worker threads are freed", "risks": "Some orders may use a less accurate cached quote", "preconditions": "Product owner agrees a fallback quote is acceptable; change made via Git", "rollback": "Revert the configuration commit in the GitOps repository"}
+    }
+  },
+  "INC-003": {
+    "initial": {
+      "hypothesis": "inventory-service runs out of memory: the product cache keeps growing, heap usage climbs above 90%, long Full GC pauses appear, then OutOfMemoryError and OOMKilled (exit code 137) restart the pod. The cycle repeats after each restart.",
+      "root_cause_category": "memory_pressure",
+      "supporting_evidence": ["product-cache size grows steadily before each crash", "JVM heap used rises from ~60% to 99% of 512Mi", "java.lang.OutOfMemoryError: Java heap space in ProductCache.put", "container terminated reason=OOMKilled exit code 137; Back-off restarting"],
+      "confidence": "medium",
+      "alternatives": ["Memory limit simply too small for normal load"],
+      "missing_evidence": ["Heap dump or cache size configuration"],
+      "remediation": {"action": "Temporarily raise the inventory-service memory limit from 512Mi to 1Gi and cap the product cache size", "action_type": "increase_resource_limits", "target": "inventory-service", "expected_impact": "Pods stop being OOMKilled while the cache fix is prepared", "risks": "Higher node memory use; without a cache cap the problem only takes longer to appear", "preconditions": "Node has spare memory; change made in Git and synced by ArgoCD", "rollback": "Revert the resource-limit commit in Git"}
+    }
+  },
+  "INC-004": {
+    "initial": {
+      "hypothesis": "The 2.3.0 rollout of notification-service cannot start because its configuration is missing: the pod references ConfigMap 'notification-config-v2', which does not exist, and the application cannot resolve SMTP_HOST. The old 2.2.4 pods are still serving.",
+      "root_cause_category": "configuration_error",
+      "supporting_evidence": ["kubelet: configmap \"notification-config-v2\" not found (CreateContainerConfigError)", "Could not resolve placeholder 'SMTP_HOST'", "Application run failed: missing required property mail.smtp.host", "deployment notification-service: 0/2 replicas available"],
+      "confidence": "medium",
+      "alternatives": ["The ConfigMap was renamed rather than deleted"],
+      "missing_evidence": ["Whether 'notification-config-v2' exists in the GitOps repository but was not synced"],
+      "remediation": {"action": "Fix the ConfigMap reference (create notification-config-v2 or point the Deployment back to notification-config) in the GitOps repository, then sync", "action_type": "update_configuration", "target": "notification-service", "expected_impact": "New pods start and the rollout completes", "risks": "A wrong SMTP value would break email delivery", "preconditions": "Confirm the correct SMTP settings with the owning team", "rollback": "git revert the deployment change so ArgoCD restores version 2.2.4"}
+    }
+  }
+}

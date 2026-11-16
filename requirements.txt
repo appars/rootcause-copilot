@@ -1,0 +1,7 @@
+# RootCause Copilot - runtime dependencies (tested with Python 3.13 in the build environment;
+# Python 3.11 or 3.12 recommended on student laptops).
+streamlit>=1.50,<2
+groq>=0.30,<2
+PyYAML>=6.0,<7
+pypdf>=5.0,<8
+fpdf2>=2.8,<3

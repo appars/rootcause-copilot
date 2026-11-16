@@ -1,0 +1,57 @@
+# SYNTHETIC / FICTIONAL training data - RootCause Copilot workshop. Not from a real system.
+2026-11-12T10:26:45.074Z INFO  [payment-service] POST /api/v1/checkout status=200 latency_ms=96 order=367459
+2026-11-12T10:26:50.018Z INFO  [payment-service] POST /api/v1/checkout status=200 latency_ms=195 order=595185
+2026-11-12T10:26:59.231Z INFO  [payment-service] POST /api/v1/checkout status=200 latency_ms=133 order=198418
+2026-11-12T10:27:07.133Z INFO  [payment-service] POST /api/v1/checkout status=200 latency_ms=179 order=553789
+2026-11-12T10:27:15.993Z INFO  [payment-service] POST /api/v1/checkout status=200 latency_ms=80 order=829633
+2026-11-12T10:27:23.556Z INFO  [payment-service] POST /api/v1/checkout status=200 latency_ms=138 order=719869
+2026-11-12T10:27:35.118Z INFO  [payment-service] POST /api/v1/checkout status=200 latency_ms=161 order=132075
+2026-11-12T10:27:39.297Z INFO  [payment-service] POST /api/v1/checkout status=200 latency_ms=218 order=109652
+2026-11-12T10:27:50.810Z INFO  [payment-service] POST /api/v1/checkout status=200 latency_ms=177 order=819830
+2026-11-12T10:27:56.543Z INFO  [payment-service] POST /api/v1/checkout status=200 latency_ms=188 order=861111
+2026-11-12T10:28:00.775Z INFO  [payment-service] POST /api/v1/checkout status=200 latency_ms=136 order=900798
+2026-11-12T10:28:08.278Z INFO  [payment-service] POST /api/v1/checkout status=200 latency_ms=206 order=679715
+2026-11-12T10:28:14.143Z INFO  [payment-service] POST /api/v1/checkout status=200 latency_ms=139 order=809727
+2026-11-12T10:28:19.893Z INFO  [payment-service] POST /api/v1/checkout status=200 latency_ms=197 order=403858
+2026-11-12T10:28:31.305Z INFO  [payment-service] scheduler started job=settlement-report-export window=24h
+2026-11-12T10:28:38.635Z INFO  [payment-service] HikariPool-1 - Pool stats (total=20, active=12, idle=8, waiting=0)
+2026-11-12T10:28:49.965Z INFO  [payment-service] POST /api/v1/checkout status=200 latency_ms=402 order=294936
+2026-11-12T10:28:59.000Z INFO  [payment-service] POST /api/v1/checkout status=200 latency_ms=603 order=226762
+2026-11-12T10:29:08.945Z INFO  [payment-service] POST /api/v1/checkout status=200 latency_ms=812 order=542611
+2026-11-12T10:29:17.006Z INFO  [payment-service] POST /api/v1/checkout status=200 latency_ms=494 order=418104
+2026-11-12T10:29:23.280Z WARN  [payment-service] slow query took 9022ms: SELECT ... FROM settlement_ledger JOIN payment_events ... (job=settlement-report-export)
+2026-11-12T10:29:34.049Z INFO  [payment-service] HikariPool-1 - Pool stats (total=20, active=19, idle=1, waiting=6)
+2026-11-12T10:29:42.092Z WARN  [payment-service] slow query took 13825ms: SELECT ... FROM settlement_ledger ... (job=settlement-report-export)
+2026-11-12T10:29:52.918Z WARN  [payment-service] slow query took 12934ms: SELECT ... FROM settlement_ledger ... (job=settlement-report-export)
+2026-11-12T10:29:58.860Z WARN  [payment-service] slow query took 12311ms: SELECT ... FROM settlement_ledger ... (job=settlement-report-export)
+2026-11-12T10:29:59.288Z WARN  [payment-service] HikariPool-1 - Pool stats (total=20, active=20, idle=0, waiting=60)
+2026-11-12T10:30:00.863Z INFO  [payment-service] POST /api/v1/checkout status=200 latency_ms=5569 order=190667
+2026-11-12T10:30:01.929Z WARN  [payment-service] HikariPool-1 - Pool stats (total=20, active=20, idle=0, waiting=35)
+2026-11-12T10:30:02.776Z WARN  [payment-service] HikariPool-1 - Pool stats (total=20, active=20, idle=0, waiting=56)
+2026-11-12T10:30:03.767Z ERROR [payment-service] POST /api/v1/checkout status=503 latency_ms=30157 error=PAYMENT_PROCESSING_UNAVAILABLE order=837549
+2026-11-12T10:30:05.036Z ERROR [payment-service] checkout failed for order=706261: could not persist payment intent (timeout acquiring connection)
+2026-11-12T10:30:05.459Z WARN  [payment-service] HikariPool-1 - Pool stats (total=20, active=20, idle=0, waiting=57)
+2026-11-12T10:30:05.583Z ERROR [payment-service] java.sql.SQLTransientConnectionException: HikariPool-1 - Connection is not available, request timed out after 30000ms.
+2026-11-12T10:30:07.431Z ERROR [payment-service] java.sql.SQLTransientConnectionException: HikariPool-1 - Connection is not available, request timed out after 30000ms.
+2026-11-12T10:30:08.299Z WARN  [payment-service] HikariPool-1 - Pool stats (total=20, active=20, idle=0, waiting=47)
+2026-11-12T10:30:09.497Z INFO  [payment-service] POST /api/v1/checkout status=200 latency_ms=6261 order=382359
+2026-11-12T10:30:10.754Z ERROR [payment-service] POST /api/v1/checkout status=503 latency_ms=30373 error=PAYMENT_PROCESSING_UNAVAILABLE order=105986
+2026-11-12T10:30:12.482Z WARN  [payment-service] HikariPool-1 - Pool stats (total=20, active=20, idle=0, waiting=57)
+2026-11-12T10:30:13.568Z ERROR [payment-service] checkout failed for order=688626: could not persist payment intent (timeout acquiring connection)
+2026-11-12T10:30:15.472Z ERROR [payment-service] java.sql.SQLTransientConnectionException: HikariPool-1 - Connection is not available, request timed out after 30000ms.
+2026-11-12T10:30:16.265Z WARN  [payment-service] HikariPool-1 - Pool stats (total=20, active=20, idle=0, waiting=60)
+2026-11-12T10:30:21.864Z WARN  [api-gateway] upstream payment-service p95 latency 2870ms above SLO 800ms
+2026-11-12T10:30:29.902Z INFO  [payment-service] JVM heap used=41% gc_pause_ms=12
+2026-11-12T10:30:37.781Z INFO  [payment-service] cpu usage 38%
+2026-11-12T10:30:38.559Z ERROR [payment-service] java.sql.SQLTransientConnectionException: HikariPool-1 - Connection is not available, request timed out after 30000ms.
+2026-11-12T10:30:39.317Z ERROR [payment-service] POST /api/v1/checkout status=503 latency_ms=30275 error=PAYMENT_PROCESSING_UNAVAILABLE order=666345
+2026-11-12T10:30:40.601Z WARN  [payment-service] HikariPool-1 - Pool stats (total=20, active=20, idle=0, waiting=79)
+2026-11-12T10:30:41.330Z ERROR [payment-service] java.sql.SQLTransientConnectionException: HikariPool-1 - Connection is not available, request timed out after 30000ms.
+2026-11-12T10:30:42.570Z ERROR [payment-service] POST /api/v1/checkout status=503 latency_ms=30411 error=PAYMENT_PROCESSING_UNAVAILABLE order=340758
+2026-11-12T10:30:43.877Z WARN  [payment-service] HikariPool-1 - Pool stats (total=20, active=20, idle=0, waiting=75)
+2026-11-12T10:30:45.088Z ERROR [payment-service] java.sql.SQLTransientConnectionException: HikariPool-1 - Connection is not available, request timed out after 30000ms.
+2026-11-12T10:30:46.824Z ERROR [payment-service] POST /api/v1/checkout status=503 latency_ms=30408 error=PAYMENT_PROCESSING_UNAVAILABLE order=677795
+2026-11-12T10:30:48.438Z WARN  [payment-service] HikariPool-1 - Pool stats (total=20, active=20, idle=0, waiting=56)
+2026-11-12T10:30:48.600Z ERROR [payment-service] java.sql.SQLTransientConnectionException: HikariPool-1 - Connection is not available, request timed out after 30000ms.
+2026-11-12T10:31:00.148Z WARN  [payment-service] slow query took 20577ms: SELECT ... FROM settlement_ledger ... (job=settlement-report-export)
+2026-11-12T10:31:04.814Z INFO  [payment-service] /actuator/health status=UP db=UP (validation query 4200ms)
