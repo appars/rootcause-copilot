@@ -7,8 +7,9 @@ metadata:
   name: rootcause-data
   namespace: rootcause
   annotations:
-    # Safety: even with ArgoCD auto-sync + prune, never delete the volume holding incident memory.
-    argocd.argoproj.io/sync-options: Prune=false
+    # Safety for GitOps: ArgoCD never prunes this volume, and keeps it even if the ArgoCD Application
+    # is deleted (Delete=false). Incident memory is only removed by an explicit "kubectl delete pvc".
+    argocd.argoproj.io/sync-options: Prune=false,Delete=false
 spec:
   accessModes: [ReadWriteOnce]
   resources:

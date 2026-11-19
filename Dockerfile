@@ -1,10 +1,17 @@
 # RootCause Copilot v1.1 - container image (workshop-simple, production-conscious)
-# No API key is ever baked into the image: supply GROQ_API_KEY at runtime (Kubernetes Secret) or in the UI.
-#   Build:  docker build --build-arg APP_VERSION=day4-v1 -t <DOCKERHUB_USERNAME>/rootcause-copilot:day4-v1 .
-#   Run:    docker run --rm -p 8501:8501 -v rootcause-data:/data <DOCKERHUB_USERNAME>/rootcause-copilot:day4-v1
-FROM python:3.12-slim
+# No API key, .env file or database is ever baked into the image: supply GROQ_API_KEY at run time
+# (docker run -e / Kubernetes Secret) or paste it in the app's sidebar.
+#
+#   Build:  docker build -t DOCKERHUB_USERNAME/rootcause-copilot:latest .
+#   Run:    docker run -d --name rootcause -p 8501:8501 -v rootcause-data:/data DOCKERHUB_USERNAME/rootcause-copilot:latest
+#   Guides: README_WINDOWS.md, README_MAC.md, docs/DOCKER_DEPLOYMENT.md
+#
+# PYTHON_IMAGE can point to a mirror of the same official image (e.g. a company registry); keep the default otherwise.
+ARG PYTHON_IMAGE=python:3.12-slim
+FROM ${PYTHON_IMAGE}
 
-ARG APP_VERSION=day4-v1
+# Build label shown in the sidebar ("build ..."). Kubernetes overrides it with ROOTCAUSE_APP_VERSION.
+ARG APP_VERSION=latest
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     PIP_NO_CACHE_DIR=1 \
@@ -22,7 +29,7 @@ RUN groupadd --gid 10001 app \
 
 # Dependencies first: this layer is cached until requirements.txt changes.
 COPY requirements.txt .
-RUN pip install -r requirements.txt
+RUN python -m pip install -r requirements.txt
 
 # Application code (see .dockerignore: no .env, no tests, no local database).
 COPY . .

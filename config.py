@@ -20,7 +20,7 @@ APP_FULL_NAME = "RootCause Copilot \u2013 AI-Powered IT Operations Investigation
 APP_TAGLINE = "AI-Powered IT Operations Investigation Platform (educational reference implementation)"
 APP_RELEASE = "v1.1"
 # Build/image tag baked into the container (shown in the sidebar; changes during the Day 5 GitOps demo).
-APP_VERSION = os.getenv("ROOTCAUSE_APP_VERSION", "day4-v1")
+APP_VERSION = os.getenv("ROOTCAUSE_APP_VERSION", "local")
 
 # --------------------------------------------------------------------------
 # LLM provider - fixed, read-only in the UI

@@ -3,7 +3,6 @@ import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-GITOPS = ROOT.parent / "rootcause-copilot-gitops"
 TEXT_EXT = {".py", ".md", ".yaml", ".yml", ".json", ".txt", ".toml", ".example", ".ini", ""}
 # Groq keys start with "gsk_". The test file that uses a FAKE key is excluded explicitly.
 KEY_RE = re.compile(r"gsk_[A-Za-z0-9]{20,}")
@@ -18,7 +17,7 @@ def _files(base: Path):
 
 def test_no_real_looking_api_keys_committed():
     hits = []
-    for base in (ROOT, GITOPS):
+    for base in (ROOT,):
         for p in _files(base):
             if p.suffix in TEXT_EXT and p.name not in ALLOWED_FAKE:
                 text = p.read_text(encoding="utf-8", errors="ignore")
@@ -44,7 +43,7 @@ def test_gitignore_covers_secrets_and_state():
 
 
 def test_no_secret_manifests_in_deployment_folders():
-    for folder in (ROOT / "kubernetes", GITOPS / "apps"):
+    for folder in (ROOT / "kubernetes", ROOT / "argocd"):
         if folder.exists():
             for f in folder.rglob("*.yaml"):
                 assert "kind: Secret" not in f.read_text(), f
@@ -53,12 +52,12 @@ def test_no_secret_manifests_in_deployment_folders():
 def test_markdown_relative_links_resolve():
     link = re.compile(r"\]\((?!https?://|#|mailto:)([^)\s#]+)")
     broken = []
-    for md in list(ROOT.rglob("*.md")) + list(GITOPS.rglob("*.md")):
+    for md in ROOT.rglob("*.md"):
         if any(part in {".venv", ".pytest_cache"} for part in md.parts):
             continue
         for target in link.findall(md.read_text(encoding="utf-8")):
             if not (md.parent / target).exists():
-                broken.append(f"{md.relative_to(ROOT.parent)} -> {target}")
+                broken.append(f"{md.relative_to(ROOT)} -> {target}")
     assert broken == []
 
 
@@ -67,12 +66,15 @@ def test_required_documents_exist():
                  "DAY5_WINDOWS_DEPLOYMENT_HOMEWORK.md", "TROUBLESHOOTING.md", "HOMEWORK_SUBMISSION.md",
                  "TEST_RESULTS.md"):
         assert (ROOT / "docs" / name).exists(), name
-    for name in ("README.md", "ARCHITECTURE.md", "SECURITY.md", "RELEASE_NOTES.md"):
+    for name in ("DOCKER_DEPLOYMENT.md", "KUBERNETES_DEPLOYMENT.md", "ARGOCD_GITOPS.md"):
+        assert (ROOT / "docs" / name).exists(), name
+    for name in ("README.md", "README_WINDOWS.md", "README_MAC.md", "ARCHITECTURE.md", "SECURITY.md",
+                 "RELEASE_NOTES.md", ".env.example"):
         assert (ROOT / name).exists(), name
 
 
 def test_instructor_material_not_in_student_repository():
-    names = {p.name for p in _files(ROOT)} | {p.name for p in _files(GITOPS)}
+    names = {p.name for p in _files(ROOT)}
     for forbidden in ("INSTRUCTOR_ANSWER_KEY.md", "INSTRUCTOR_NOTES.md", "DEMO_SCRIPT.md"):
         assert forbidden not in names, forbidden
 

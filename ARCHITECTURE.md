@@ -161,7 +161,7 @@ simulated execution note) and reflected in the saved trace. Risk levels come fro
 
 ```mermaid
 flowchart LR
-    SRC["App repo<br/>rootcause-copilot"] -->|"docker build<br/>APP_VERSION=day4-v1"| IMG["Image<br/>user/rootcause-copilot:day4-v1"]
+    SRC["Repo rootcause-copilot<br/>(code + kubernetes/)"] -->|"docker build"| IMG["Image<br/>user/rootcause-copilot:latest"]
     IMG -->|"docker push"| HUB[("Docker Hub")]
     subgraph K8S["Kubernetes cluster (Rancher Desktop / k3s)"]
       subgraph NS["namespace: rootcause"]
@@ -171,7 +171,7 @@ flowchart LR
         POD --> PVC[("PVC rootcause-data 1Gi<br/>mounted at /data")]
       end
     end
-    HUB -->|"pull"| POD
+    HUB -->|"pull (imagePullPolicy Always)"| POD
     USER["Browser"] -->|"kubectl port-forward 8501:80"| SVC
 ```
 
@@ -182,22 +182,23 @@ Production designs would use PostgreSQL or a managed database (deliberately defe
 
 ```mermaid
 sequenceDiagram
-    participant Dev as Instructor
-    participant Git as GitOps repo (GitHub)
+    participant Dev as Instructor / student
+    participant Git as GitHub repo (kubernetes/ on main)
     participant Argo as ArgoCD (namespace argocd)
     participant K8s as Kubernetes (namespace rootcause)
-    Dev->>Git: edit kustomization.yaml newTag day4-v1 → day5-v2, commit, push
-    Argo->>Git: poll / Refresh
-    Argo-->>Dev: OutOfSync (diff = image tag)
-    Dev->>Argo: Sync (or auto-sync)
-    Argo->>K8s: apply desired state
-    K8s-->>Argo: rollout complete → Healthy + Synced
+    Dev->>Git: ROOTCAUSE_APP_VERSION gitops-v1 → gitops-v2, commit, push
+    Argo->>Git: poll (~3 min) / Refresh
+    Argo->>K8s: automated sync (Recreate rollout)
+    K8s-->>Argo: Healthy + Synced
+    Dev->>K8s: kubectl delete service (drift)
+    Argo->>K8s: self-heal re-creates it
     Dev->>Git: git revert HEAD, push (rollback)
-    Argo->>K8s: sync back to day4-v1
+    Argo->>K8s: sync back to gitops-v1
 ```
 
-Repositories: application code in `rootcause-copilot`; desired state in `rootcause-copilot-gitops`
-(`apps/rootcause-copilot/` + `argocd/`). No Secret ever lives in either repository.
+One repository: application code and desired state (`kubernetes/`, watched by `argocd/rootcause-copilot-application.yaml`)
+live together; Docker Hub holds the built image. Automated sync + self-heal, pruning off; the PVC and Namespace
+carry `Prune=false,Delete=false`. No Secret ever lives in the repository.
 
 ## 8. Security boundaries
 

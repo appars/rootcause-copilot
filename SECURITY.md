@@ -26,7 +26,7 @@ subject to the account's limits, rate limits and applicable pricing; free usage 
   (commands in `kubernetes/README.md`). The value never touches a file.
 - File option: `kubernetes/groq-secret.template` → copy to `kubernetes/groq.secret.yaml` (git-ignored pattern
   `*.secret.yaml`), apply, delete the copy.
-- The GitOps repository contains **no** Secret; `.gitignore` files in both repositories block common secret files.
+- The repository (including `kubernetes/`, which ArgoCD watches) contains **no** Secret; `.gitignore` blocks common secret files and a test enforces it.
 - base64 in a Secret is encoding, not encryption. Never project `kubectl get secret -o yaml`.
 - Production: use a secret manager (External Secrets Operator, Sealed Secrets, cloud KMS) - out of scope here.
 
@@ -78,12 +78,13 @@ subject to the account's limits, rate limits and applicable pricing; free usage 
 | Slim base image `python:3.12-slim`, runtime dependencies only (no pytest) | `Dockerfile` |
 | Non-root user `10001`, `HOME=/tmp`, owns only `/data` | `Dockerfile` |
 | `.dockerignore` excludes `.env`, databases, venvs, tests, docs | `.dockerignore` |
-| No key in the image; versioned tags (`day4-v1`), never only `latest` | Dockerfile + manifests |
+| No key in the image. Course convention `latest` + `imagePullPolicy: Always` (simple, but Git does not record which build runs - use versioned tags in production) | Dockerfile + manifests |
 | `runAsNonRoot`, `fsGroup`, `seccompProfile: RuntimeDefault` | `kubernetes/deployment.yaml` |
 | `allowPrivilegeEscalation: false`, all Linux capabilities dropped | `kubernetes/deployment.yaml` |
 | `automountServiceAccountToken: false` (the app never calls the Kubernetes API) | `kubernetes/deployment.yaml` |
 | Only port 8501 exposed; ClusterIP Service + `kubectl port-forward` (no public ingress) | `service.yaml` |
-| PVC protected from ArgoCD pruning (`Prune=false` annotation) | `kubernetes/pvc.yaml` |
+| PVC and Namespace protected from ArgoCD pruning/deletion (`Prune=false,Delete=false`); automated `prune: false` | `kubernetes/pvc.yaml`, `namespace.yaml`, `argocd/` |
+| CI needs no secrets and never pushes; optional publish workflow is manual-only and uses a Docker Hub access token secret | `.github/workflows/` |
 
 `readOnlyRootFilesystem` is **not** enabled because it has not been tested with Streamlit in this build; it is a
 good next hardening step after testing.

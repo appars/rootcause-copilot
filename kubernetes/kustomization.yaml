@@ -1,4 +1,9 @@
-# Kustomize lets us change the image tag in ONE place for each release (day4-v1 -> day5-v2).
+# Kustomize entry point - used by BOTH deployment paths:
+#   manual:  kubectl apply -k kubernetes/
+#   GitOps:  ArgoCD (argocd/rootcause-copilot-application.yaml, path: kubernetes)
+# Preview the exact YAML that will be applied:  kubectl kustomize kubernetes/
+# The image is set in ONE place: deployment.yaml (replace DOCKERHUB_USERNAME there).
+# The Groq Secret is NOT listed here on purpose - it is created by hand and never committed (see README.md).
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
@@ -7,7 +12,3 @@ resources:
   - pvc.yaml
   - deployment.yaml
   - service.yaml
-images:
-  - name: docker.io/DOCKERHUB_USERNAME/rootcause-copilot
-    newName: docker.io/DOCKERHUB_USERNAME/rootcause-copilot   # PLACEHOLDER: replace DOCKERHUB_USERNAME (lowercase)
-    newTag: day4-v1
