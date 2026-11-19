@@ -1,0 +1,156 @@
+# RootCause Copilot - Continuous Integration
+# Runs on every push and pull request. No Groq API key and no Docker Hub credentials are needed:
+# the LLM is mocked in the tests, and the Docker image is only BUILT and RUN here, never pushed.
+#
+#   job 1  tests      - unit + integration + Streamlit UI tests (pytest), then a real headless start (smoke test)
+#   job 2  manifests  - kubectl kustomize + schema validation of the Kubernetes and ArgoCD YAML
+#   job 3  docker     - docker build, run, health check, persistence across restart and re-creation
+name: ci
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  tests:
+    name: Tests and smoke test (Python ${{ matrix.python-version }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt -r requirements-dev.txt
+
+      - name: Check for syntax errors and broken imports
+        run: |
+          python -m compileall -q app.py config.py core memory tools ui scripts
+          python - <<'PY'
+          import importlib, pkgutil
+          for pkg in ("core", "memory", "tools", "ui"):
+              m = importlib.import_module(pkg)
+              for info in pkgutil.iter_modules(m.__path__):
+                  importlib.import_module(f"{pkg}.{info.name}")
+          import config
+          print("all modules import cleanly")
+          PY
+
+      - name: Run tests (Groq mocked - live tests are skipped without a key)
+        run: python -m pytest
+
+      - name: Smoke test - start the real app headless and call the health endpoint
+        env:
+          ROOTCAUSE_DATA_DIR: ${{ runner.temp }}/rootcause-data
+        run: |
+          python -m streamlit run app.py --server.headless true --server.port 8599 > streamlit.log 2>&1 &
+          for i in $(seq 1 30); do
+            if curl -fsS http://localhost:8599/_stcore/health; then echo; break; fi
+            sleep 2
+          done
+          curl -fsS http://localhost:8599/_stcore/health; echo
+          curl -fsS -o /dev/null -w "home page HTTP %{http_code}\n" http://localhost:8599/
+          if grep -iE "Traceback|Error" streamlit.log; then cat streamlit.log; exit 1; fi
+
+  manifests:
+    name: Kubernetes and ArgoCD manifest validation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Render with Kustomize (the exact YAML that kubectl apply -k / ArgoCD will apply)
+        run: |
+          kubectl version --client
+          kubectl kustomize kubernetes/ > rendered.yaml
+          cat rendered.yaml
+
+      - name: Install kubeconform
+        run: |
+          curl -fsSL https://github.com/yannh/kubeconform/releases/latest/download/kubeconform-linux-amd64.tar.gz | tar xz
+          ./kubeconform -v
+
+      - name: Validate Kubernetes resources against the official schemas
+        run: ./kubeconform -strict -summary -kubernetes-version 1.33.0 rendered.yaml
+
+      - name: Validate the ArgoCD Application against its CRD schema
+        run: |
+          ./kubeconform -strict -summary \
+            -schema-location default \
+            -schema-location 'https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json' \
+            argocd/rootcause-copilot-application.yaml
+
+      - name: Workshop rules (one replica, no committed Secret, PVC protected)
+        run: |
+          python3 - <<'PY'
+          import yaml
+          docs = [d for d in yaml.safe_load_all(open("rendered.yaml")) if d]
+          kinds = {d["kind"]: d for d in docs}
+          assert "Secret" not in kinds, "never commit Secrets"
+          assert kinds["Deployment"]["spec"]["replicas"] == 1, "SQLite -> exactly one replica"
+          assert "Delete=false" in kinds["PersistentVolumeClaim"]["metadata"]["annotations"]["argocd.argoproj.io/sync-options"]
+          assert {d["metadata"].get("namespace", "rootcause") for d in docs if d["kind"] != "Namespace"} == {"rootcause"}
+          print("workshop rules OK")
+          PY
+
+  docker:
+    name: Docker image build and runtime test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build the image (not pushed)
+        run: docker build -t rootcause-copilot:ci .
+
+      - name: Run the container with a named volume
+        run: docker run -d --name rootcause -p 8501:8501 -v rootcause-data:/data rootcause-copilot:ci
+
+      - name: Wait until Docker reports the container healthy
+        run: |
+          for i in $(seq 1 30); do
+            status=$(docker inspect -f '{{.State.Health.Status}}' rootcause)
+            echo "health: $status"
+            [ "$status" = "healthy" ] && break
+            sleep 5
+          done
+          [ "$(docker inspect -f '{{.State.Health.Status}}' rootcause)" = "healthy" ] || { docker logs rootcause; exit 1; }
+          curl -fsS http://localhost:8501/_stcore/health; echo
+
+      - name: Security checks inside the container
+        run: |
+          test "$(docker exec rootcause id -u)" = "10001"          # non-root
+          docker exec rootcause sh -c 'test ! -e /app/.env'         # no .env baked in
+          docker exec rootcause sh -c 'test -z "$GROQ_API_KEY"'      # no key baked in
+          docker exec rootcause sh -c 'test -w /data'               # data dir writable
+
+      - name: Persistence - data survives restart and container re-creation
+        run: |
+          # write one incident into SQLite on the /data volume (same code path the app uses)
+          docker exec rootcause python -c "from memory.database import init_db; from memory.incident_repository import create_incident; init_db(); create_incident('CI persistence probe', 'ci-service', 'SEV4', incident_id='INC-CI-PROBE')"
+          CHECK="from memory.incident_repository import get_incident; import sys; sys.exit(0 if get_incident('INC-CI-PROBE') else 1)"
+          docker restart rootcause && sleep 5
+          docker exec rootcause python -c "$CHECK" && echo "survived docker restart"
+          docker rm -f rootcause
+          docker run -d --name rootcause2 -v rootcause-data:/data rootcause-copilot:ci
+          sleep 5
+          docker exec rootcause2 python -c "$CHECK" && echo "survived container re-creation"
+
+      - name: Container logs (always shown)
+        if: always()
+        run: docker logs rootcause 2>/dev/null || docker logs rootcause2 || true

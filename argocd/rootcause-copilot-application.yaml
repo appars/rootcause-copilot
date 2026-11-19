@@ -1,6 +1,13 @@
-# ArgoCD Application: "keep namespace 'rootcause' in sync with this folder of the GitOps repository".
-# PLACEHOLDER: replace GITHUB_USERNAME with your GitHub account (the repository must be reachable by ArgoCD;
-# a public repository needs no credentials).
+# ArgoCD Application - "keep namespace rootcause equal to the kubernetes/ folder of this repository".
+# ONE repository: the same repo holds the application code (built into the Docker image) AND the
+# Kubernetes manifests (watched by ArgoCD). ArgoCD only reads kubernetes/ - it never builds images.
+#
+#   Instructor: repoURL below is the course repository - commit your Docker Hub username into
+#               kubernetes/deployment.yaml first (ArgoCD deploys what is in Git).
+#   Students:   fork the repository, then change repoURL to YOUR fork, e.g.
+#               https://github.com/<your-github-user>/rootcause-copilot.git  (needed for the git revert demo)
+#
+#   kubectl apply -f argocd/rootcause-copilot-application.yaml
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
@@ -9,14 +16,17 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/GITHUB_USERNAME/rootcause-copilot-gitops.git
-    targetRevision: main
-    path: apps/rootcause-copilot
+    repoURL: https://github.com/appars/rootcause-copilot.git
+    targetRevision: main          # branch ArgoCD follows
+    path: kubernetes              # folder with kustomization.yaml
   destination:
-    server: https://kubernetes.default.svc
+    server: https://kubernetes.default.svc   # the cluster ArgoCD runs in (Rancher Desktop)
     namespace: rootcause
-  # No "automated" block: the FIRST deployment is a manual sync, so students see each step.
-  # Auto-sync is switched on later in the demo (see docs/DAY5_MAC_INSTRUCTOR_GUIDE.md).
   syncPolicy:
+    automated:
+      selfHeal: true   # manual changes in the cluster are reverted to what Git says
+      prune: false     # conservative: resources removed from Git are NOT deleted automatically
+                       # (the PVC and namespace are additionally protected with Prune=false,Delete=false)
     syncOptions:
       - CreateNamespace=true
+  revisionHistoryLimit: 5

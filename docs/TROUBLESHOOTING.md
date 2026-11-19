@@ -98,36 +98,46 @@ failing. One failed investigation is marked *failed* in its trace; other investi
 
 | Symptom | Fix |
 |---|---|
-| `Cannot connect to the Docker daemon` | Rancher Desktop not running, or engine is containerd → use `nerdctl`. |
-| `denied: requested access to the resource is denied` on push | `docker login`; the image name must start with **your** Docker Hub user. |
-| `invalid reference format` | Uppercase letters or spaces in the image name. |
-| Build very slow | First build downloads the base image; later builds reuse cached layers. |
+| `Cannot connect to the Docker daemon` / `error during connect` | Rancher/Docker Desktop not running; engine is containerd (use `nerdctl` or switch to dockerd); wrong `docker context` |
+| `denied: requested access to the resource is denied` on push | `docker login -u <you>` with an access token; the image name must start with **your** Docker Hub user |
+| `invalid reference format` | uppercase letters or spaces in the image name |
+| Build very slow | first build downloads the base image; later builds reuse cached layers |
+| Container `unhealthy` | `docker logs rootcause`; allow 30-60 s for the first start |
+| `port is already allocated` | another app/container uses 8501 → `-p 8502:8501` |
+| Data gone after re-creating the container | `-v rootcause-data:/data` was missing |
+| `exec format error` | image built for another CPU (arm64 vs amd64) → multi-platform build (README_MAC.md, E4) |
 
 ## Rancher Desktop runtime
 
-- dockerd (moby) → `docker` CLI; containerd → `nerdctl` CLI (add `--namespace k8s.io` to make local images visible to Kubernetes).
+- dockerd (moby) → `docker` CLI (used in the guides); containerd → `nerdctl` CLI.
 - Switching engines restarts the VM; images built in one engine are not visible in the other.
-- Windows needs WSL 2 and hardware virtualization; reset Kubernetes from *Troubleshooting* if it hangs.
+- Windows needs WSL 2 and hardware virtualization; *Troubleshooting → Reset Kubernetes* if it hangs.
+- Give the VM ≥ 4 GB memory (6 GB with ArgoCD).
 
 ## Kubernetes context, PVC, probes and image pull
 
 | Symptom | Fix |
 |---|---|
-| Deploying to the wrong cluster | `kubectl config current-context` → `kubectl config use-context rancher-desktop`. |
-| `ImagePullBackOff` / `ErrImagePull` | Placeholder not replaced, tag not pushed, or private repository. `kubectl -n rootcause describe pod -l app=rootcause-copilot`. |
-| `InvalidImageName` | Uppercase letters (e.g. the literal `DOCKERHUB_USERNAME` placeholder). |
-| PVC `Pending` | k3s `local-path` binds when the pod is scheduled - wait; check `kubectl get storageclass`. |
-| Pod restarts / readiness fails | `kubectl -n rootcause logs deploy/rootcause-copilot`; first start takes ~20-40 s (startupProbe allows 150 s). |
-| `OOMKilled` | Increase `limits.memory` in Git (and sync). |
-| `exec format error` | Image architecture does not match the node - build multi-arch with buildx. |
+| Deploying to the wrong cluster | `kubectl config current-context` → `kubectl config use-context rancher-desktop` (Docker Desktop: `docker-desktop`) |
+| `InvalidImageName` | the literal `DOCKERHUB_USERNAME` placeholder (uppercase) is still in `kubernetes/deployment.yaml` |
+| `ErrImagePull` / `ImagePullBackOff` | image not pushed, name typo, or repository private. `kubectl -n rootcause describe pod -l app=rootcause-copilot` |
+| New `latest` pushed but old app still runs | `kubectl -n rootcause rollout restart deployment/rootcause-copilot` (`imagePullPolicy: Always` pulls again) |
+| PVC `Pending` | `local-path` binds when the pod is scheduled - wait; `kubectl get storageclass` must show a default |
+| Pod restarts / readiness fails | `kubectl -n rootcause logs deploy/rootcause-copilot [--previous]`; first start takes ~20-40 s (startupProbe allows 150 s) |
+| `OOMKilled` | increase `limits.memory` in Git (and sync) |
+| Port-forward stops after a rollout | the pod was replaced (`Recreate`) - start the port-forward again |
+| Secret created but key not used | pods read env vars at start → `kubectl -n rootcause rollout restart deployment/rootcause-copilot` |
 
 ## ArgoCD sync and Git repository access
 
 | Symptom | Fix |
 |---|---|
-| Cannot open https://localhost:8080 | Port-forward window closed - `kubectl port-forward svc/argocd-server -n argocd 8080:443`. Accept the self-signed certificate. |
-| `ComparisonError` / repository not accessible | Repository private or URL typo; must end in `.git`; `targetRevision: main`; `path: apps/rootcause-copilot`. |
-| Stays OutOfSync after a push | Click **Refresh**; check the commit is on `main`; check the diff. |
-| `Unknown` health / sync error about CRDs | ArgoCD install incomplete - re-run the install with `--server-side --force-conflicts`. |
-| Rollback button disabled | Auto-sync is on - roll back with `git revert` (Git is the source of truth). |
-| Lost admin password | `kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}"` and decode (see guides). |
+| Cannot open https://localhost:8080 | port-forward window closed - `kubectl -n argocd port-forward svc/argocd-server 8080:443`; accept the self-signed certificate |
+| `ComparisonError` / repository not accessible | repository private or URL typo; `repoURL` should end in `.git`; `targetRevision: main`; `path: kubernetes` |
+| Stays OutOfSync after a push | click **Refresh** (polling is ~3 min); check the commit is on `main`; open the *Diff* |
+| `Degraded` | usually the pod: `ImagePullBackOff` (placeholder / not pushed) or `CrashLoopBackOff` (logs) |
+| Manual `kubectl` change disappears | expected: self-heal - change Git instead |
+| Resource deleted from Git still in the cluster | expected: `prune: false`; delete it by hand or enable pruning deliberately |
+| Rollback button disabled | auto-sync is on - roll back with `git revert` |
+| `Unknown` health / CRD errors | ArgoCD install incomplete - re-run the install with `--server-side --force-conflicts` |
+| Lost admin password | `kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}"` and decode (see the platform READMEs) |

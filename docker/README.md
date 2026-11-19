@@ -1,20 +1,26 @@
 # Docker quick reference
 
-The `Dockerfile` lives in the repository root (so the build context is the whole app).
-Replace `<DOCKERHUB_USERNAME>` with your Docker Hub user name (lowercase).
+The `Dockerfile` and `.dockerignore` live in the repository root (the build context is the whole app).
+Step-by-step: [README_WINDOWS.md](../README_WINDOWS.md#d-docker) · [README_MAC.md](../README_MAC.md#d-docker) ·
+concepts and design: [docs/DOCKER_DEPLOYMENT.md](../docs/DOCKER_DEPLOYMENT.md).
+
+Replace `DOCKERHUB_USERNAME` with your Docker Hub username (lowercase). Course convention: one tag, `latest`.
 
 ```bash
-# build (version is baked into the image and shown in the app sidebar)
-docker build --build-arg APP_VERSION=day4-v1 -t <DOCKERHUB_USERNAME>/rootcause-copilot:day4-v1 .
+docker build -t DOCKERHUB_USERNAME/rootcause-copilot:latest .
+docker run -d --name rootcause -p 8501:8501 -v rootcause-data:/data DOCKERHUB_USERNAME/rootcause-copilot:latest
+docker ps                                   # (healthy) after ~30 s
+docker logs -f rootcause
+docker login -u DOCKERHUB_USERNAME          # paste a Docker Hub access token, not your password
+docker push DOCKERHUB_USERNAME/rootcause-copilot:latest
 
-# run locally with a named volume for SQLite memory
-docker run --rm -p 8501:8501 -v rootcause-data:/data <DOCKERHUB_USERNAME>/rootcause-copilot:day4-v1
-
-# push
-docker login
-docker push <DOCKERHUB_USERNAME>/rootcause-copilot:day4-v1
+# instructor: one tag for Apple Silicon AND Intel/AMD machines
+docker buildx build --platform linux/amd64,linux/arm64 -t DOCKERHUB_USERNAME/rootcause-copilot:latest --push .
 ```
 
-With Rancher Desktop in **containerd** mode use `nerdctl` instead of `docker` (same flags), and add
-`--namespace k8s.io` if you want the image visible to the local cluster without a registry.
-Multi-architecture images (Apple Silicon + Intel) - see docs/DAY5_MAC_INSTRUCTOR_GUIDE.md.
+| Build argument | Default | Purpose |
+|---|---|---|
+| `PYTHON_IMAGE` | `python:3.12-slim` | base image; only change it to a mirror of the same official image |
+| `APP_VERSION` | `latest` | build label shown in the sidebar (Kubernetes overrides it with `ROOTCAUSE_APP_VERSION`) |
+
+Rancher Desktop in **containerd** mode: use `nerdctl` with the same flags.

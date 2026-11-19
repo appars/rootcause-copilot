@@ -4,3 +4,7 @@ metadata:
   name: rootcause
   labels:
     app.kubernetes.io/part-of: rootcause-copilot
+  annotations:
+    # Deleting a namespace deletes everything in it - including the PVC with incident memory.
+    # ArgoCD must therefore never prune it or delete it together with the Application.
+    argocd.argoproj.io/sync-options: Prune=false,Delete=false

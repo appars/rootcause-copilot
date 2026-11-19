@@ -44,9 +44,9 @@ rule-based, *partial* answer for this incident - marks are for **your** reasonin
 
 | Item | Value |
 |---|---|
-| Application repository URL (your fork/clone on GitHub) | |
-| GitOps repository URL (`rootcause-copilot-gitops`) | |
-| Docker Hub image (`user/rootcause-copilot`) and tags | |
+| Your fork on GitHub (`https://github.com/<you>/rootcause-copilot`) - holds the code **and** the `kubernetes/` folder ArgoCD watches | |
+| Docker Hub image (`<you>/rootcause-copilot:latest`) | |
+| Commit hash of your `gitops-v2` change and of the `git revert` | |
 
 ## 2. Evidence checklist
 
@@ -58,10 +58,10 @@ fallback path (section 4).
 |---|---|---|---|---|
 | 1 | Screenshot: app running locally (Day 4, Python venv) | ☐ | ☐ | ☐ |
 | 2 | Screenshot: `docker build` finished **or** `docker image ls` showing the image | ☐ | ☐ | ☐ |
-| 3 | Screenshot: container running (`docker ps`) + app in browser showing *Version day4-v1* | ☐ | ☐ | ☐ |
+| 3 | Screenshot: `docker ps` showing `(healthy)` + app in browser; your image on hub.docker.com | ☐ | ☐ | ☐ |
 | 4 | Screenshot: `kubectl -n rootcause get pods,svc,pvc` (pod Running, PVC Bound) | ☐ | ☐ | ☐ |
-| 5 | Screenshot: ArgoCD application *Synced* and *Healthy* | ☐ | ☐ | ☐ |
-| 6 | Screenshot or short explanation: **OutOfSync → Synced** after changing `newTag` to `day5-v2` | ☐ | ☐ | ☐ |
+| 5 | Screenshot: ArgoCD application *Synced* and *Healthy* (resource tree visible) | ☐ | ☐ | ☐ |
+| 6 | Screenshots: sidebar **build gitops-v2** after your Git change, Service restored by **self-heal**, and **build gitops-v1** after `git revert` | ☐ | ☐ | ☐ |
 | 7 | Evidence that incident memory persists (after app restart / container restart / pod deletion) | ☐ | ☐ | ☐ |
 | 8 | Architecture diagram in your own words (Docker → registry → Git → ArgoCD → Kubernetes) | ☐ | ☐ | ☐ |
 
@@ -78,25 +78,28 @@ If you could not run Kubernetes locally, submit as many of these as possible:
 
 1. Day 4 app running + persistence evidence.
 2. Docker build/run evidence (any machine with Docker or Rancher Desktop without Kubernetes).
-3. Your GitOps repository with correctly edited manifests and `kustomization.yaml`
-   (+ `kubectl kustomize apps\rootcause-copilot` output if kubectl is available).
+3. Your fork with correctly edited `kubernetes/deployment.yaml` and `argocd/rootcause-copilot-application.yaml`
+   (+ `kubectl kustomize kubernetes\` output if kubectl is available).
 4. Your own architecture diagram and explanation.
 5. Instructor-demo screenshots **clearly labelled** "instructor demo" with your explanation of each step.
+
+Step-by-step guide for Part B: [README_WINDOWS.md](../README_WINDOWS.md) (macOS: [README_MAC.md](../README_MAC.md)).
 
 ## 5. Evaluation expectations (Part B, 20 marks)
 
 | Area | Marks | Full marks when |
 |---|---|---|
-| Container | 5 | image built with a versioned tag, runs locally, pushed and **pulled back** successfully |
+| Container | 5 | image built as `<you>/rootcause-copilot:latest`, runs healthy with a volume, pushed and **pulled back** successfully |
 | Kubernetes | 5 | pod Running, PVC Bound, Service reachable, memory survives a pod restart (or a correct YAML review on the fallback path) |
-| GitOps | 5 | ArgoCD Synced/Healthy, OutOfSync → Synced after the tag change, rollback by `git revert` (or a correct written explanation on the fallback path) |
+| GitOps | 5 | ArgoCD Synced/Healthy, `gitops-v2` rolled out from Git, self-heal shown, rollback by `git revert` (or a correct written explanation on the fallback path) |
 | Reflection + honesty | 5 | clear answers below; limitations and simulated steps stated honestly; no credentials anywhere |
 
 ## 6. Reflection (5-10 lines each)
 
 1. What worked on the first attempt? What failed, and how did you diagnose it?
 2. Why does the Deployment use exactly **one** replica and the `Recreate` strategy?
-3. Why is the image tag `day4-v1`/`day5-v2` and never `latest` in a GitOps workflow?
+3. This course uses the `latest` tag. Why does a new `latest` image need `kubectl rollout restart`, and what would
+   versioned tags (e.g. `1.2.0` or a commit SHA) improve in a real GitOps workflow?
 4. ConfigMap vs Secret: what goes where in this project, and why is the Secret not in Git?
 5. Explain in your own words what ArgoCD did when you changed one line in Git.
 6. What would you change before running RootCause Copilot for a real company?

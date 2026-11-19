@@ -52,7 +52,8 @@ class FakeCompletions:
 def fake_client(script):
     completions = FakeCompletions(script)
     client = SimpleNamespace(chat=SimpleNamespace(completions=completions),
-                             models=SimpleNamespace(retrieve=lambda model: SimpleNamespace(id=model)))
+                             models=SimpleNamespace(list=lambda: SimpleNamespace(
+                                 data=[SimpleNamespace(id="openai/gpt-oss-20b")])))
     return client, completions
 
 

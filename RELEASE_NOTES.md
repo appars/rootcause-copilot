@@ -1,5 +1,24 @@
 # Release Notes - RootCause Copilot
 
+## v1.1 · Day 5 deployment-ready update (2026-11)
+
+The application itself is unchanged; this update makes the repository deployable end to end from **one**
+repository: local → Docker → Docker Hub → Kubernetes (Rancher Desktop) → ArgoCD.
+
+| Area | Before | Now |
+|---|---|---|
+| Guides | `docs/DAY5_MAC_INSTRUCTOR_GUIDE.md`, `docs/DAY5_WINDOWS_DEPLOYMENT_HOMEWORK.md` | **`README_WINDOWS.md`** (PowerShell, students) and **`README_MAC.md`** (zsh, Apple Silicon + Intel); new deep dives `docs/DOCKER_DEPLOYMENT.md`, `docs/KUBERNETES_DEPLOYMENT.md`, `docs/ARGOCD_GITOPS.md`; old guides are redirect stubs |
+| GitOps layout | separate `rootcause-copilot-gitops` repository | ArgoCD watches `kubernetes/` of **this** repository (`main`) |
+| Image convention | `day4-v1` / `day5-v2`, set in `kustomization.yaml` | `DOCKERHUB_USERNAME/rootcause-copilot:latest`, set in `deployment.yaml`, `imagePullPolicy: Always`; update with `kubectl rollout restart` |
+| GitOps demo | change the image tag | change the release label `ROOTCAUSE_APP_VERSION` `gitops-v1` → `gitops-v2`; rollback with `git revert` |
+| ArgoCD policy | manual sync, then a patch enabling prune + self-heal | automated sync + **self-heal**, **prune off**; PVC and Namespace `Prune=false,Delete=false` |
+| Dockerfile | fixed base | `ARG PYTHON_IMAGE` (default `python:3.12-slim`), `APP_VERSION` default `latest`; `.dockerignore` also excludes `.github`, `README_*.md`, dev requirements, logs, secret files |
+| CI | none | `.github/workflows/ci.yml`: pytest (3.11 + 3.12), headless smoke test, kustomize + kubeconform, Docker build/health/non-root/persistence; optional manual `docker-publish.yml` (amd64 + arm64) |
+| Tests | two-repository checks | single-repository checks: Kustomize rendering, cross-references, ArgoCD policy, data protection, Dockerfile/.dockerignore, CI safety |
+| Local build label | `day4-v1` | `local` (container: `latest`; Kubernetes: `gitops-v1`) |
+| Groq connection check | `models.retrieve("openai/gpt-oss-20b")` - 404 with groq SDK 1.x (slash URL-encoded), seen in Docker | `models.list()` + id check; regression test with the real SDK (0.30 and 1.x) |
+
+
 ## v1.1 - Workshop release (Day 4 + Day 5)
 
 **RootCause Copilot – AI-Powered IT Operations Investigation Platform.** This release builds on v1.0. It keeps the

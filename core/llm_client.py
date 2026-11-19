@@ -121,9 +121,17 @@ class GroqLLM:
 
     # ------------------------------------------------------------------ API
     def test_connection(self) -> str:
-        """Cheap check: retrieve the fixed model's metadata (no tokens generated)."""
-        model = self._with_retries(lambda: self._client.models.retrieve(config.LLM_MODEL))
-        return f"Connected to {config.LLM_PROVIDER}; model '{getattr(model, 'id', config.LLM_MODEL)}' is available."
+        """Cheap check (no tokens generated): list the models this key can use and look for the fixed model.
+
+        models.list() is used instead of models.retrieve(): the model id contains a slash
+        ("openai/gpt-oss-20b"), and groq SDK 1.x URL-encodes it in the retrieve path
+        (/models/openai%2Fgpt-oss-20b), which the API answers with 404 even for a valid key.
+        """
+        listing = self._with_retries(lambda: self._client.models.list())
+        ids = {getattr(m, "id", None) for m in (getattr(listing, "data", None) or [])}
+        if config.LLM_MODEL not in ids:
+            raise LLMError("not_found", f"Model '{config.LLM_MODEL}' was not found for this key/account.")
+        return f"Connected to {config.LLM_PROVIDER}; model '{config.LLM_MODEL}' is available."
 
     def chat_tools(self, messages: list[dict[str, Any]], tools: list[dict[str, Any]]) -> ChatResult:
         """One chat turn where the model may request ONE tool call (gpt-oss-20b has no parallel tool use)."""

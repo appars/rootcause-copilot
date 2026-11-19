@@ -253,7 +253,8 @@ def _check_deployment(dep: dict[str, Any], configmaps: set[str], secrets: set[st
                                 "Kubernetes cannot start a container without an image.", "image: (empty)"))
         elif image.endswith(":latest") or ":" not in image.split("/")[-1]:
             out.append(_finding("warning", where, "image-tag", f"Image '{image}' uses 'latest' or no tag.",
-                                "Use an immutable version tag (e.g. day4-v1) so GitOps rollouts and rollbacks are predictable.",
+                                "Use an immutable version tag (e.g. 1.2.0 or a Git commit SHA) so GitOps rollouts and rollbacks are predictable. "
+                                "If you keep 'latest' (as the workshop does for simplicity), set imagePullPolicy: Always.",
                                 f"image: {image}"))
         resources = c.get("resources") or {}
         if not resources.get("requests"):

@@ -26,9 +26,11 @@ spec:
           type: RuntimeDefault
       containers:
         - name: rootcause-copilot
-          # PLACEHOLDER image - the tag is managed in kustomization.yaml (never "latest").
-          image: docker.io/DOCKERHUB_USERNAME/rootcause-copilot:day4-v1
-          imagePullPolicy: IfNotPresent
+          # >>> EDIT THIS LINE: replace appars with YOUR Docker Hub username (lowercase). <<<
+          # Workshop convention: one moving tag, "latest". Always = pull again on every pod start, so
+          # "kubectl rollout restart" picks up a newly pushed :latest image.
+          image: docker.io/appars/rootcause-copilot:latest
+          imagePullPolicy: Always
           securityContext:
             allowPrivilegeEscalation: false
             capabilities:
@@ -40,6 +42,10 @@ spec:
             - configMapRef:
                 name: rootcause-config
           env:
+            # Release label shown in the sidebar ("build gitops-v1"). Changing it in Git changes the pod
+            # template, so ArgoCD rolls out a new pod - used for the GitOps change + git revert demo.
+            - name: ROOTCAUSE_APP_VERSION
+              value: "gitops-v1"
             - name: GROQ_API_KEY
               valueFrom:
                 secretKeyRef:
