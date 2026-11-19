@@ -16,6 +16,7 @@ repository: local → Docker → Docker Hub → Kubernetes (Rancher Desktop) →
 | CI | none | `.github/workflows/ci.yml`: pytest (3.11 + 3.12), headless smoke test, kustomize + kubeconform, Docker build/health/non-root/persistence; optional manual `docker-publish.yml` (amd64 + arm64) |
 | Tests | two-repository checks | single-repository checks: Kustomize rendering, cross-references, ArgoCD policy, data protection, Dockerfile/.dockerignore, CI safety |
 | Local build label | `day4-v1` | `local` (container: `latest`; Kubernetes: `gitops-v1`) |
+| Groq connection check | `models.retrieve("openai/gpt-oss-20b")` - 404 with groq SDK 1.x (slash URL-encoded), seen in Docker | `models.list()` + id check; regression test with the real SDK (0.30 and 1.x) |
 
 
 ## v1.1 - Workshop release (Day 4 + Day 5)
