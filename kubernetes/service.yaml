@@ -13,7 +13,4 @@ spec:
     - name: http
       port: 80
       targetPort: http      # = containerPort 8501
-      nodePort: 30501t diff
-git commit -am "Expose RootCause Copilot via NodePort 30501 for local demo"
-git push
-
+      nodePort: 30501
