@@ -207,10 +207,10 @@ A Docker image is the application *plus* its Python runtime and libraries, packe
 sealed lunchbox: what you packed at home is exactly what you open at college. Details: [docs/DOCKER_DEPLOYMENT.md](docs/DOCKER_DEPLOYMENT.md).
 
 ```bash
-docker build -t DOCKERHUB_USERNAME/rootcause-copilot:latest .
-docker run -d --name rootcause -p 8501:8501 -v rootcause-data:/data DOCKERHUB_USERNAME/rootcause-copilot:latest
+docker build -t $DOCKERHUB_USERNAME/rootcause-copilot:latest .
+docker run -d --name rootcause -p 8501:8501 -v rootcause-data:/data $DOCKERHUB_USERNAME/rootcause-copilot:latest
 docker ps                    # STATUS shows (healthy) after ~30 s
-docker push DOCKERHUB_USERNAME/rootcause-copilot:latest     # after docker login
+docker push $DOCKERHUB_USERNAME/rootcause-copilot:latest     # after docker login
 ```
 
 | Design decision | Why |
