@@ -5,9 +5,15 @@ metadata:
   namespace: rootcause
   labels: {app: rootcause-copilot}
 spec:
-  type: ClusterIP
+  # NodePort: reachable at http://localhost:30501 on Rancher Desktop (classroom demo).
+  # Use ClusterIP + Ingress (with authentication) on a real cluster.
+  type: NodePort
   selector: {app: rootcause-copilot}
   ports:
     - name: http
       port: 80
       targetPort: http      # = containerPort 8501
+      nodePort: 30501t diff
+git commit -am "Expose RootCause Copilot via NodePort 30501 for local demo"
+git push
+
